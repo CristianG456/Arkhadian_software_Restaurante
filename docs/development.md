@@ -59,15 +59,30 @@ convention.
 ## Running the stack
 
 ```powershell
-.\scripts\dev.ps1          # Core in its own window + Admin here
+.\scripts\dev.ps1          # checks prerequisites, Core in its own window, then Admin here
 # or individually:
 .\scripts\start-core.ps1   # Restaurant Core only
-.\scripts\start-admin.ps1  # Admin Desktop only (native window, not a browser tab)
+.\scripts\start-admin.ps1  # Admin Desktop only - opens a native Tauri window, never a browser
 .\scripts\status.ps1       # quick CLI health/status check, no UI needed
 ```
 
-Admin Desktop keeps running and retrying if Core isn't up yet — you
-don't need to start things in a particular order.
+`.\scripts\dev.ps1` is the normal way to run Restaurant Admin: it
+validates PHP/Node/npm/Rust are on PATH, starts Core, waits for
+`/api/health` to actually respond (failing fast with a clear message if
+it doesn't within ~20s), then launches Admin as a native window. It
+never opens a web browser.
+
+Once running, Admin keeps retrying on its own if Core later goes down
+and comes back — that resilience is independent of how the two were
+started.
+
+**`npm run dev` inside `apps/admin-desktop` is not "the app".** It's
+Vite alone, the same command Tauri's `beforeDevCommand` runs internally
+- opening `http://localhost:1420` in a browser shows the React UI but
+skips Tauri entirely (no native window, no window title, no
+single-instance behavior). Use it (or the identical `npm run dev:web`)
+only for fast frontend-only iteration; use `.\scripts\start-admin.ps1`
+or `npm run tauri -- dev` to actually run Restaurant Admin.
 
 ## Environment variables
 
