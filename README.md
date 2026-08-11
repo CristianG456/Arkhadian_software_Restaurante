@@ -25,8 +25,10 @@ docs/                   architecture.md, development.md
 ```
 
 See `docs/architecture.md` for how the pieces fit together and the
-reasoning behind the key decisions, and `docs/development.md` for setup,
-environment variables, and troubleshooting.
+reasoning behind the key decisions, `docs/development.md` for setup,
+environment variables, and troubleshooting, `docs/database.md` for the
+migrations/seeders workflow, and `docs/git-workflow.md` for the branching
+model (GitFlow — `main` / `develop` / `feature`/`release`/`hotfix`).
 
 ## Requirements
 
@@ -57,6 +59,15 @@ checked independently and re-polled automatically.
 | `.\scripts\start-core.ps1` | Start Restaurant Core only |
 | `.\scripts\start-admin.ps1` | Start Admin Desktop only |
 | `.\scripts\status.ps1` | CLI health/status check, no UI |
+| `.\scripts\db-reset.ps1` | **Dev only** — drop, re-migrate, reseed the local DB |
+
+## Working as a team
+
+This repo follows GitFlow (`docs/git-workflow.md`): `main` is
+production-only, `develop` is the integration branch, work happens on
+`feature/*` branches merged via Pull Request. Database structure and
+seed data are never shared by copying a database — see
+`docs/database.md`.
 
 ## Status
 

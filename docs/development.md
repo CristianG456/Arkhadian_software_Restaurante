@@ -1,14 +1,27 @@
 # Development
 
+For the Git branching model both developers follow, see
+`docs/git-workflow.md`. For everything about migrations, seeders, and
+keeping two local databases in sync, see `docs/database.md`.
+
 ## Requirements
 
-- PHP 8.3+ with `pdo_pgsql`, `pgsql`, `mbstring`, `openssl`, `curl`, `fileinfo`, `intl`, `zip`
-- Composer 2
-- Node.js 20+ and npm
-- Rust (stable, MSVC toolchain on Windows) + Cargo
-- PostgreSQL 16+, running locally
-- Windows: Microsoft C++ Build Tools + Windows 10/11 SDK (Tauri's native
-  dependency), WebView2 (preinstalled on current Windows)
+Exact versions this project is built and verified against — install
+these, don't guess:
+
+- PHP **8.4** with `pdo_pgsql`, `pgsql`, `mbstring`, `openssl`, `curl`, `fileinfo`, `intl`, `zip` (`composer.json` requires `^8.3` as the floor)
+- Composer **2.10+**
+- Node.js **20+** (built against 24) and npm — see `apps/admin-desktop/package.json` `engines`
+- Rust stable (MSVC toolchain on Windows) + Cargo — install via [rustup](https://rustup.rs)
+- PostgreSQL **16+** (built against 18), running locally
+- Windows: Microsoft C++ Build Tools ("Desktop development with C++"
+  workload) + Windows 10/11 SDK (Tauri's native dependency), WebView2
+  (preinstalled on current Windows)
+
+Both developers should stay on the same major versions above — lockfiles
+(`composer.lock`, `package-lock.json`, `src-tauri/Cargo.lock`) pin exact
+dependency versions and are committed; don't delete or regenerate them
+casually (see `docs/git-workflow.md`).
 
 ## First-time setup
 
@@ -38,6 +51,10 @@ Set `DB_PASSWORD` in `services/restaurant-core/.env` to match, then:
 ```powershell
 .\scripts\migrate.ps1
 ```
+
+See `docs/database.md` for the full collaborative workflow: what to run
+after pulling changes, the migration-immutability rule, and the seeders
+convention.
 
 ## Running the stack
 
@@ -81,7 +98,8 @@ cd services\restaurant-core
 php artisan test              # run the test suite
 .\vendor\bin\pint              # format PHP
 php artisan route:list         # inspect registered routes
-php artisan migrate:fresh      # reset the local database
+cd ..\..\
+.\scripts\db-reset.ps1         # DEV ONLY: drop, re-migrate, reseed — see docs/database.md
 
 # Admin Desktop
 cd apps\admin-desktop
@@ -117,3 +135,11 @@ Tauri's Rust side links natively on Windows and needs `cl.exe` /
 Tauri, see `vite.config.ts`) need to be free. Change `CORE_PORT` in
 `.env` if 8000 is taken by something else — don't hardcode a different
 port anywhere else; everything reads it from configuration.
+
+**A `.ps1` script throws `TerminatorExpectedAtEndOfString` on someone's
+machine but not yours.**
+Windows PowerShell 5.1 reads `.ps1` files without a BOM using the system
+codepage, not UTF-8 — an em dash or curly quote inside a string literal
+gets misread as a different byte sequence and breaks parsing. Keep
+`scripts/*.ps1` plain ASCII (use `-` instead of `—`, straight quotes
+only); this bit us once already while building `db-reset.ps1`.

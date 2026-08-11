@@ -2,7 +2,7 @@
 .SYNOPSIS
   Starts the full local dev environment: Restaurant Core in its own window,
   then Admin Desktop in this one. Closing Admin Desktop (or Ctrl+C here)
-  does not stop Core — close its window separately, mirroring how the two
+  does not stop Core - close its window separately, mirroring how the two
   are independent processes in production.
 #>
 $ErrorActionPreference = 'Stop'
@@ -23,7 +23,7 @@ for ($i = 0; $i -lt 20; $i++) {
 if ($ready) {
     Write-Host "==> Restaurant Core is up." -ForegroundColor Green
 } else {
-    Write-Host "==> Restaurant Core did not respond yet — Admin Desktop will keep retrying on its own." -ForegroundColor Yellow
+    Write-Host "==> Restaurant Core did not respond yet - Admin Desktop will keep retrying on its own." -ForegroundColor Yellow
 }
 
 Write-Host "==> Starting Admin Desktop..." -ForegroundColor Cyan

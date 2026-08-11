@@ -14,7 +14,7 @@ composer install
 if (-not (Test-Path '.env')) {
     Copy-Item '.env.example' '.env'
     php artisan key:generate
-    Write-Host "Created services/restaurant-core/.env — edit DB_PASSWORD before running migrate." -ForegroundColor Yellow
+    Write-Host "Created services/restaurant-core/.env - edit DB_PASSWORD before running migrate." -ForegroundColor Yellow
 }
 Pop-Location
 
