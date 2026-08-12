@@ -1,0 +1,81 @@
+.switch {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  min-height: var(--touch-target-min);
+  cursor: pointer;
+}
+
+.switch__text {
+  display: flex;
+  flex-direction: column;
+}
+
+.switch__label {
+  font-size: var(--font-size-base);
+  color: var(--color-text-primary);
+}
+
+.switch__description {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}
+
+.switch__control {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  width: 44px;
+  height: 26px;
+}
+
+.switch__input {
+  position: absolute;
+  inset: -9px;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.switch__track {
+  width: 44px;
+  height: 26px;
+  border-radius: var(--radius-full);
+  background: var(--color-border-strong);
+  transition: background-color var(--duration-base) var(--easing-standard);
+}
+
+.switch__thumb {
+  display: block;
+  width: 20px;
+  height: 20px;
+  margin: 3px;
+  border-radius: var(--radius-full);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--duration-base) var(--easing-standard);
+}
+
+.switch__input:checked ~ .switch__track {
+  background: var(--color-primary-500);
+}
+
+.switch__input:checked ~ .switch__track .switch__thumb {
+  transform: translateX(18px);
+}
+
+.switch__input:focus-visible ~ .switch__track {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}
+
+.switch__input:disabled ~ .switch__track {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.switch:has(.switch__input:disabled) {
+  cursor: not-allowed;
+}

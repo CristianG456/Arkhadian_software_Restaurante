@@ -1,0 +1,67 @@
+.keypad {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  width: 100%;
+  max-width: 280px;
+}
+
+.keypad__row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-2);
+}
+
+.keypad__key {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  height: 56px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  transition: background-color var(--duration-fast) var(--easing-standard);
+}
+
+.keypad__key:hover:not(:disabled) {
+  background: var(--color-surface-hover);
+}
+
+.keypad__key:active:not(:disabled) {
+  background: var(--color-surface-active);
+  transform: translateY(1px);
+}
+
+.keypad__key:disabled {
+  color: var(--color-text-disabled);
+  cursor: not-allowed;
+}
+
+.keypad__key--muted {
+  color: var(--color-text-secondary);
+}
+
+.keypad__key--confirm {
+  background: var(--color-primary-500);
+  border-color: var(--color-primary-500);
+  color: var(--color-text-inverse);
+}
+
+.keypad__key--confirm:hover:not(:disabled) {
+  background: var(--color-primary-600);
+}
+
+.keypad__key--confirm:disabled {
+  background: var(--color-surface-sunken);
+  border-color: var(--color-border);
+  color: var(--color-text-disabled);
+}
+
+.keypad__key--wide {
+  grid-column: 1 / -1;
+  font-size: var(--font-size-base);
+}

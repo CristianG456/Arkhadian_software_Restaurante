@@ -1,0 +1,117 @@
+.showcase {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  max-width: 900px;
+  padding-bottom: var(--space-10);
+}
+
+.showcase__intro p {
+  color: var(--color-text-secondary);
+  margin-top: var(--space-1);
+  font-size: var(--font-size-sm);
+}
+
+.showcase__intro p.showcase__intro-note {
+  color: var(--color-text-tertiary);
+  font-size: var(--font-size-xs);
+}
+
+.showcase__index {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  padding-bottom: var(--space-2);
+}
+
+.showcase__index-item {
+  min-height: 36px;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+}
+
+.showcase__index-item:hover {
+  background: var(--color-surface-hover);
+  color: var(--color-text-primary);
+}
+
+.showcase__section {
+  scroll-margin-top: var(--space-4);
+}
+
+/* One consistent gap between every direct block in a section - rows,
+   grids, subheadings, stacks - instead of ad-hoc margins on each. */
+.showcase__section .panel__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.showcase__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.showcase__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--space-3);
+  align-items: start;
+}
+
+.showcase__stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.showcase__subheading h3 {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.showcase__subheading p {
+  margin-top: 2px;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}
+
+.showcase__kicker {
+  display: block;
+  margin-bottom: var(--space-1);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  color: var(--color-text-tertiary);
+}
+
+.showcase__hint {
+  margin: 0 0 var(--space-2);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}
+
+.showcase__tab-content {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+.showcase__keypad-demo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.showcase__keypad-value {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  font-family: ui-monospace, Consolas, monospace;
+}

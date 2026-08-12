@@ -1,0 +1,14 @@
+.settings {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  max-width: 760px;
+}
+
+.settings__title {
+  font-size: var(--font-size-xl);
+}
+
+.settings__panel {
+  margin-top: var(--space-2);
+}
