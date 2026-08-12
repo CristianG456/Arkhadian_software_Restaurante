@@ -1,0 +1,54 @@
+.data-list {
+  overflow-x: auto;
+}
+
+.data-list__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-size-sm);
+}
+
+.data-list__table thead th {
+  position: sticky;
+  top: 0;
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-surface-sunken);
+  color: var(--color-text-secondary);
+  font-weight: 600;
+  font-size: var(--font-size-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  border-bottom: 1px solid var(--color-border);
+  white-space: nowrap;
+}
+
+.data-list__table tbody tr {
+  border-bottom: 1px solid var(--color-border);
+}
+
+.data-list__table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.data-list__table td {
+  padding: var(--space-3) var(--space-4);
+  min-height: var(--touch-target-min);
+  color: var(--color-text-primary);
+}
+
+.data-list__row--clickable {
+  cursor: pointer;
+}
+
+.data-list__row--clickable:hover {
+  background: var(--color-surface-hover);
+}
+
+.data-list__row--clickable:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: -2px;
+}
+
+.data-list__row--selected {
+  background: var(--color-primary-50);
+}

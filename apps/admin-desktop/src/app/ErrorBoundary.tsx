@@ -1,4 +1,6 @@
-import { Component, type ErrorInfo, type ReactNode } from 'react'
+import { Component } from 'react'
+import type { ErrorInfo, ReactNode } from 'react'
+import './ErrorBoundary.css'
 
 interface ErrorBoundaryProps {
   children: ReactNode
@@ -10,7 +12,7 @@ interface ErrorBoundaryState {
 
 /**
  * Last resort for unexpected render-time failures. Network/API failures
- * never reach this — those are handled by useSystemStatus — this only
+ * never reach this - those are handled by useSystemStatus - this only
  * catches genuine bugs, so the whole window doesn't go blank.
  */
 export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
@@ -27,9 +29,11 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
   render(): ReactNode {
     if (this.state.hasError) {
       return (
-        <div style={{ padding: '2rem', fontFamily: 'sans-serif' }}>
-          <h1 style={{ fontSize: '1.1rem' }}>Ocurrió un error inesperado.</h1>
-          <p style={{ color: '#6b7280' }}>Reinicia Restaurant Admin. El detalle técnico quedó en el registro.</p>
+        <div className="crash-screen">
+          <h1 className="crash-screen__title">Ocurrió un error inesperado.</h1>
+          <p className="crash-screen__body">
+            Reinicia Restaurant Admin. El detalle técnico quedó en el registro.
+          </p>
         </div>
       )
     }

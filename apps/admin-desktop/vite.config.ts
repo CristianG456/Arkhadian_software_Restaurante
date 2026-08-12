@@ -1,4 +1,4 @@
-import { defineConfig } from 'vite'
+import { defineConfig } from 'vitest/config'
 import react from '@vitejs/plugin-react'
 import { readFileSync } from 'node:fs'
 import { fileURLToPath, URL } from 'node:url'
@@ -25,5 +25,10 @@ export default defineConfig({
     watch: {
       ignored: ['**/src-tauri/**'],
     },
+  },
+  test: {
+    // Pure-logic tests only (see numericKeypad.logic.test.ts) - no DOM
+    // needed, so the default 'node' environment is enough.
+    include: ['src/**/*.test.ts'],
   },
 })
