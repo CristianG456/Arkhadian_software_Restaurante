@@ -1,0 +1,36 @@
+.home {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-4);
+  max-width: 560px;
+  padding: var(--space-8) var(--space-2);
+}
+
+.home__title {
+  font-size: var(--font-size-xl);
+}
+
+.home__status {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.home__status-icon--ok {
+  color: var(--color-success-solid);
+}
+
+.home__status-icon--warn {
+  color: var(--color-warning-solid);
+}
+
+.home__status-text {
+  font-size: var(--font-size-md);
+  color: var(--color-text-primary);
+}
+
+.home__timestamp {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-tertiary);
+}

@@ -1,0 +1,77 @@
+.search-input {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-height: var(--touch-target-min);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  padding: 0 var(--space-3);
+  gap: var(--space-2);
+}
+
+.search-input:focus-within {
+  border-color: var(--color-focus-ring);
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 1px;
+}
+
+.search-input__icon {
+  flex-shrink: 0;
+  color: var(--color-text-tertiary);
+}
+
+.search-input__field {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: var(--font-size-base);
+  color: var(--color-text-primary);
+}
+
+.search-input__field::placeholder {
+  color: var(--color-text-tertiary);
+}
+
+/* Chromium's native search-cancel affordance is redundant with ours. */
+.search-input__field::-webkit-search-cancel-button {
+  display: none;
+}
+
+.search-input__status {
+  flex-shrink: 0;
+  color: var(--color-text-tertiary);
+}
+
+.search-input__status--spin {
+  animation: search-input-spin 1s linear infinite;
+}
+
+@keyframes search-input-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.search-input__clear {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--color-text-tertiary);
+}
+
+.search-input__clear:hover {
+  background: var(--color-surface-hover);
+  color: var(--color-text-primary);
+}
