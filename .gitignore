@@ -1,0 +1,20 @@
+# Each app/service has its own .gitignore for its build artifacts
+# (vendor/, node_modules/, target/, dist/, storage/logs/, ...). This file
+# only covers repo-wide concerns.
+
+# Secrets — defense in depth on top of each app's own .env ignore rule.
+.env
+.env.*
+!.env.example
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editors
+.vscode/*
+!.vscode/extensions.json
+.idea/
+
+# Local AI tooling state (not project source)
+.claude/
