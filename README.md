@@ -1,10 +1,12 @@
-# Restaurant System — Phase 1: Technical Base
+# Restaurant System
 
-A Local-First restaurant management system. Phase 1 delivers the
-technical foundation only: a desktop admin app, a local API backend, and
-a local database, all verifiably talking to each other — no tables,
-orders, menu, billing, or other business features yet (see
-`docs/architecture.md` for what's intentionally out of scope).
+A Local-First restaurant management system. This first stable base
+(`v0.1.0`) delivers the technical foundation and the visual shell only:
+a desktop admin app with a working navigation/design system, a local
+API backend, and a local database, all verifiably talking to each
+other — no tables, orders, menu, billing, or other business features
+yet (see `docs/architecture.md` for what's intentionally out of scope,
+and `CHANGELOG.md` for what shipped in this version).
 
 > If Internet disappears, the restaurant must be able to keep operating.
 > Admin, Core and PostgreSQL are fully local; Internet is only used for
@@ -45,8 +47,9 @@ and versions in `docs/development.md#requirements`.
 .\scripts\dev.ps1         # starts Restaurant Core + Admin Desktop
 ```
 
-Admin Desktop opens as a native window and shows the system status
-screen: Restaurant Core, database, local server and Internet, each
+Admin Desktop opens as a native window with the Inicio screen. Under
+Configuración → Sistema → Diagnóstico you'll find the real-time status
+of Restaurant Core, the database, local server and Internet, each
 checked independently and re-polled automatically.
 
 ## Main commands
@@ -71,5 +74,6 @@ seed data are never shared by copying a database — see
 
 ## Status
 
-Phase 1 (technical base) — complete. See the phase's closing summary for
-what's implemented and what's deliberately deferred to later phases.
+`v0.1.0` — technical base + visual shell, complete. See `CHANGELOG.md`
+for what shipped and `docs/architecture.md` for what's deliberately
+deferred to later phases.

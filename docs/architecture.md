@@ -1,4 +1,4 @@
-# Architecture — Phase 1
+# Architecture
 
 ## Overview
 
@@ -107,6 +107,45 @@ unreachable they render as *unknown*, never a guessed positive/negative.
 A Core that is merely slow to boot must not flash "sin conexión" for a
 few seconds. Failures inside the first `STARTUP_GRACE_MS` (6s) after
 mount keep showing `CHECKING` instead of jumping straight to `OFFLINE`.
+
+## Admin Desktop frontend structure
+
+```
+src/
+├── api/              client.ts, system.ts, types.ts — see above
+├── app/              AppShell, navigation, SystemStatusContext, ErrorBoundary
+├── components/
+│   ├── ui/            generic primitives (Button, Dialog, Toast, ...) —
+│   │                   no knowledge of tables/orders/products/restaurant
+│   └── layout/         Topbar, Sidebar — the shell chrome
+├── hooks/            useSystemStatus
+├── screens/          Inicio, Configuración/Diagnóstico, and dev/ (below)
+├── styles/           tokens.css (design tokens), global.css (reset/base)
+└── utils/            small generic helpers (cx, ...)
+```
+
+The Sidebar lists every future module (Áreas y mesas, Pedidos,
+Productos, ...) up front, disabled until its module ships — the shape
+of the product is visible before every part of it exists, rather than
+navigation growing unpredictably module by module.
+
+`components/ui` is the one constraint that matters here: those
+components take generic props (`variant`, `label`, `items`) and render
+generic markup. A future `Pedidos` screen composing them is a consumer,
+never a reason to add restaurant-specific branches inside `Button` or
+`Dialog`.
+
+### Component reference screen (dev-only)
+
+`screens/dev/ComponentShowcaseScreen.tsx` renders every `components/ui`
+primitive for visual review — not a demo users or a shipped POS should
+ever see. Two independent things keep it out of production:
+
+- `AppShell` only renders the trigger button when `import.meta.env.DEV`
+  is true (Vite bakes this to `false` in a `tauri build`).
+- It's loaded via `React.lazy()`, so its module graph is a separate
+  build chunk fetched only if that trigger is clicked — a production
+  build that (correctly) never shows the trigger never fetches it either.
 
 ## Restaurant Core
 
