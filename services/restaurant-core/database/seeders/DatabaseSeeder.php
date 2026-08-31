@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use Database\Seeders\Development\AreasAndTablesSeeder;
 use Illuminate\Database\Seeder;
 
 /**
@@ -46,8 +47,8 @@ class DatabaseSeeder extends Seeder
      */
     private function runDevelopmentSeeders(): void
     {
-        // $this->call([
-        //     \Database\Seeders\Development\...Seeder::class,
-        // ]);
+        $this->call([
+            AreasAndTablesSeeder::class,
+        ]);
     }
 }

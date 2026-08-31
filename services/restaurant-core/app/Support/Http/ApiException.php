@@ -12,7 +12,7 @@ use Throwable;
 class ApiException extends Exception
 {
     public function __construct(
-        private readonly string $code,
+        private readonly string $errorCode,
         string $message,
         private readonly int $status = 400,
         ?Throwable $previous = null,
@@ -22,7 +22,7 @@ class ApiException extends Exception
 
     public function code(): string
     {
-        return $this->code;
+        return $this->errorCode;
     }
 
     public function status(): int

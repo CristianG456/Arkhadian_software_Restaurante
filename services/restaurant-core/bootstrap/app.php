@@ -42,7 +42,11 @@ return Application::configure(basePath: dirname(__DIR__))
                 return null;
             }
 
-            return ApiResponse::error('VALIDATION_ERROR', $e->getMessage(), 422);
+            return ApiResponse::error(
+                'VALIDATION_ERROR',
+                $e->validator->errors()->first() ?: 'Los datos enviados no son válidos.',
+                422,
+            );
         });
 
         $exceptions->render(function (QueryException $e, Request $request) {
@@ -52,7 +56,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
             report($e);
 
-            return ApiResponse::error('DATABASE_UNAVAILABLE', 'Database connection unavailable.', 503);
+            return ApiResponse::error('DATABASE_UNAVAILABLE', 'La base de datos local no está disponible.', 503);
         });
 
         $exceptions->render(function (NotFoundHttpException $e, Request $request) {

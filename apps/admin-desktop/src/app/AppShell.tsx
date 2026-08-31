@@ -4,6 +4,7 @@ import { Sidebar } from '../components/layout/Sidebar'
 import { Topbar } from '../components/layout/Topbar'
 import type { ScreenKey } from './navigation'
 import { HomeScreen } from '../screens/HomeScreen'
+import { AreasTablesScreen } from '../screens/areas-tables/AreasTablesScreen'
 import { SettingsScreen } from '../screens/settings/SettingsScreen'
 import { LoadingState } from '../components/ui/Spinner'
 import './AppShell.css'
@@ -63,6 +64,7 @@ export function AppShell() {
             </Suspense>
           )}
           {activeScreen === 'home' && <HomeScreen />}
+          {activeScreen === 'areas-mesas' && <AreasTablesScreen />}
           {activeScreen === 'settings' && <SettingsScreen />}
         </main>
       </div>

@@ -35,7 +35,7 @@ class SystemStatusEndpointTest extends TestCase
 
     public function test_status_reports_the_database_as_disconnected_instead_of_failing_the_request(): void
     {
-        config(['database.connections.pgsql.password' => 'not-the-real-password']);
+        config(['database.connections.pgsql.port' => 1]);
         DB::purge('pgsql');
 
         $response = $this->getJson('/api/system/status');

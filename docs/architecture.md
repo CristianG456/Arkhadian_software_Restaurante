@@ -149,6 +149,14 @@ ever see. Two independent things keep it out of production:
 
 ## Restaurant Core
 
+### Áreas y mesas
+
+El primer módulo de negocio mantiene `Area` y `RestaurantTable` como entidades
+locales con ULID. Sus reglas y decisiones de conservación están documentadas
+en [`areas-and-tables.md`](areas-and-tables.md). Los estados activa/desactivada
+son configurativos; ocupación y mesero responsable serán responsabilidad de
+una futura `TableSession`.
+
 ### Module structure
 
 Business modules live under `app/Domain/<Module>/{Http/Controllers,

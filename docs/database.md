@@ -95,6 +95,13 @@ real seeder. When a future migration introduces structural data a module
 needs (e.g. a `roles` table), add the matching seeder in the same
 feature branch — never leave it as a "run this SQL by hand" instruction.
 
+### Areas and tables development data
+
+The Areas and Tables module registers
+`Development/AreasAndTablesSeeder`. It is idempotent and remains behind the
+existing `local`/`testing` gate, so demo areas and tables never become required
+production data. See [`areas-and-tables.md`](areas-and-tables.md).
+
 ## Identifiers
 
 Anything created after Phase 1 that might eventually sync between local

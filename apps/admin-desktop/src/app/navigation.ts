@@ -33,7 +33,7 @@ export interface NavItem {
 
 export const NAV_ITEMS: NavItem[] = [
   { key: 'home', label: 'Inicio', icon: Home, enabled: true },
-  { key: 'areas-mesas', label: 'Áreas y mesas', icon: LayoutGrid, enabled: false },
+  { key: 'areas-mesas', label: 'Áreas y mesas', icon: LayoutGrid, enabled: true },
   { key: 'pedidos', label: 'Pedidos', icon: ClipboardList, enabled: false },
   { key: 'productos', label: 'Productos', icon: UtensilsCrossed, enabled: false },
   { key: 'produccion', label: 'Producción', icon: ChefHat, enabled: false },

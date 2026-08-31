@@ -31,9 +31,7 @@ export class ApiClientError extends Error {
       case 'timeout':
         return 'Restaurant Core no respondió a tiempo.'
       case 'http':
-        return this.code
-          ? `Restaurant Core respondió con un error (${this.code}).`
-          : 'Restaurant Core respondió con un error.'
+        return this.message || 'Restaurant Core respondió con un error.'
       case 'invalid_response':
         return 'Restaurant Core envió una respuesta inesperada.'
     }

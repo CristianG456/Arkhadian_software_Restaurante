@@ -5,6 +5,8 @@ import type { ApiErrorBody } from './types'
 interface RequestOptions {
   timeoutMs?: number
   signal?: AbortSignal
+  method?: 'GET' | 'POST' | 'PUT' | 'DELETE'
+  body?: unknown
 }
 
 function isErrorEnvelope(body: unknown): body is ApiErrorBody {
@@ -33,8 +35,12 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
   let response: Response
   try {
     response = await fetch(`${env.coreBaseUrl}${path}`, {
-      method: 'GET',
-      headers: { Accept: 'application/json' },
+      method: options.method ?? 'GET',
+      headers: {
+        Accept: 'application/json',
+        ...(options.body === undefined ? {} : { 'Content-Type': 'application/json' }),
+      },
+      body: options.body === undefined ? undefined : JSON.stringify(options.body),
       signal: controller.signal,
     })
   } catch (cause) {
