@@ -41,3 +41,15 @@ export function bulkPreview(from: number, to: number, tables: RestaurantTable[])
     existingLabels: labels.filter((label) => existing.has(label.toLocaleLowerCase('es'))),
   }
 }
+
+export function tableEmptyStateTitle(
+  totalTables: number,
+  query: string,
+  filter: StatusFilter,
+): string {
+  if (totalTables === 0) return 'Esta área todavía no tiene mesas'
+  if (query.trim()) return 'No encontramos mesas'
+  if (filter === 'inactive') return 'No hay mesas desactivadas en esta área'
+  if (filter === 'active') return 'No hay mesas activas en esta área'
+  return 'No hay mesas en este filtro'
+}

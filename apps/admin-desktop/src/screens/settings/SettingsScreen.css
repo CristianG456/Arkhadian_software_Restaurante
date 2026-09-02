@@ -4,6 +4,7 @@
   gap: var(--space-4);
   max-width: 760px;
 }
+.devices-panel{display:grid;gap:var(--space-4)}.devices-panel>header,.device-list article{display:flex;align-items:center;justify-content:space-between;gap:var(--space-3)}.devices-panel>header span{display:flex;gap:var(--space-2)}.restaurant-code,.device-list article{padding:var(--space-4);border:1px solid var(--color-border);border-radius:var(--radius-md);background:var(--color-surface)}.restaurant-code,.device-list article span,.pairing-card span{display:flex;flex-direction:column}.device-list{display:grid;gap:var(--space-2)}.device-list article span{flex:1}.device-list small,.devices-panel p{color:var(--color-text-secondary)}.pairing-card{display:grid;justify-items:center;gap:var(--space-3)}.pairing-card img{width:min(100%,320px)}.pairing-card b{font-size:2rem;letter-spacing:.3rem}
 
 .settings__title {
   font-size: var(--font-size-xl);

@@ -3,6 +3,9 @@
 namespace Database\Seeders;
 
 use Database\Seeders\Development\AreasAndTablesSeeder;
+use Database\Seeders\Development\CatalogSeeder;
+use Database\Seeders\Development\ProductionSeeder;
+use Database\Seeders\Development\StaffSeeder;
 use Illuminate\Database\Seeder;
 
 /**
@@ -17,8 +20,8 @@ use Illuminate\Database\Seeder;
  *    Only runs in local/testing — never confused with essential data on
  *    a real restaurant's installation.
  *
- * Phase 1 has no business entities yet, so both lists are empty. Add a
- * seeder to the matching folder and register it below as modules land.
+ * Areas and tables add local/testing demo data below. Production still
+ * receives no commercial areas or physical table definitions.
  */
 class DatabaseSeeder extends Seeder
 {
@@ -49,6 +52,9 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             AreasAndTablesSeeder::class,
+            CatalogSeeder::class,
+            StaffSeeder::class,
+            ProductionSeeder::class,
         ]);
     }
 }

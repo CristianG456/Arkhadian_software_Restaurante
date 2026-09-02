@@ -1,5 +1,5 @@
 import { Layers3, Plus, RefreshCw } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import type { Area, RestaurantTable } from '../../api/areas'
 import { useSystemStatusContext } from '../../app/SystemStatusContext'
 import { Alert } from '../../components/ui/Alert'
@@ -12,8 +12,10 @@ import { getApiErrorMessage, useAreas } from '../../hooks/useAreas'
 import { AreaDialog } from './AreaDialog'
 import { AreaList } from './AreaList'
 import { BulkTablesDialog } from './BulkTablesDialog'
+import { MoveTableDialog } from './MoveTableDialog'
 import { TableDialog } from './TableDialog'
 import { TableGrid } from './TableGrid'
+import { TableQrDialog } from './TableQrDialog'
 import { filterAreas, moveId } from './areasTables.logic'
 import type { StatusFilter } from './areasTables.logic'
 import './AreasTablesScreen.css'
@@ -37,12 +39,43 @@ export function AreasTablesScreen() {
   const [tableDialogOpen, setTableDialogOpen] = useState(false)
   const [editingTable, setEditingTable] = useState<RestaurantTable | null>(null)
   const [bulkOpen, setBulkOpen] = useState(false)
+  const [movingTable, setMovingTable] = useState<RestaurantTable | null>(null)
+  const [qrTable, setQrTable] = useState<RestaurantTable | null>(null)
   const [confirmation, setConfirmation] = useState<Confirmation | null>(null)
+  const [availabilityAlertDismissed, setAvailabilityAlertDismissed] = useState(false)
 
   const visibleAreas = useMemo(() => filterAreas(model.areas, areaFilter), [model.areas, areaFilter])
   const selectedArea = visibleAreas.find((area) => area.id === selectedId) ?? visibleAreas[0] ?? null
   const databaseOnline = system.connectivity === 'ONLINE' && system.data?.database.status === 'connected'
   const writeDisabled = !databaseOnline || model.saving
+  const availabilityError = !databaseOnline
+    ? system.connectivity === 'ONLINE'
+      ? 'La base de datos local no está disponible.'
+      : 'Restaurant Core no está disponible.'
+    : model.error
+  const dataUnavailable = model.areas.length === 0 && Boolean(availabilityError)
+  const refreshAreas = model.refresh
+  const wasDatabaseOnline = useRef(databaseOnline)
+  const qrArea = qrTable ? model.areas.find((area) => area.id === qrTable.areaId) ?? null : null
+
+  useEffect(() => {
+    const recovered = databaseOnline && !wasDatabaseOnline.current
+    wasDatabaseOnline.current = databaseOnline
+    if (!recovered) return
+
+    const refreshId = window.setTimeout(() => {
+      setAvailabilityAlertDismissed(false)
+      void refreshAreas()
+    }, 0)
+    return () => window.clearTimeout(refreshId)
+  }, [databaseOnline, refreshAreas])
+
+  function retryLoad() {
+    setAvailabilityAlertDismissed(false)
+    model.clearError()
+    system.refresh()
+    void model.refresh()
+  }
 
   async function perform(action: () => Promise<unknown>, successMessage: string) {
     try {
@@ -99,22 +132,26 @@ export function AreasTablesScreen() {
         }}>Nueva área</Button>
       </header>
 
-      {!databaseOnline && (
-        <Alert variant='danger' title={system.connectivity === 'ONLINE' ? 'Base de datos local no disponible' : 'Restaurant Core no está disponible'}>
-          {system.connectivity === 'ONLINE'
-            ? 'No podemos acceder a las áreas porque PostgreSQL no está conectado.'
-            : 'La aplicación sigue abierta. Revisa Restaurant Core y vuelve a intentarlo.'}
-        </Alert>
-      )}
-      {model.error && (
-        <Alert variant='danger' title='No pudimos cargar las áreas' onDismiss={model.clearError}>
-          <span>{model.error}</span>
-          <Button variant='outline' size='sm' icon={<RefreshCw size={16} />} onClick={() => void model.refresh()}>Reintentar</Button>
+      {availabilityError && !availabilityAlertDismissed && (
+        <Alert
+          variant='danger'
+          title={databaseOnline ? 'No pudimos cargar las áreas' : 'Servicio local no disponible'}
+          onDismiss={() => setAvailabilityAlertDismissed(true)}
+        >
+          <span>{availabilityError}</span>
+          <Button variant='outline' size='sm' icon={<RefreshCw size={16} />} onClick={retryLoad}>Reintentar</Button>
         </Alert>
       )}
 
       {model.loading ? (
         <LoadingState label='Cargando áreas y mesas...' />
+      ) : dataUnavailable ? (
+        <EmptyState
+          icon={<Layers3 size={30} />}
+          title='Áreas no disponibles'
+          description='Conecta la base de datos local para consultar y administrar las áreas.'
+          action={<Button variant='outline' icon={<RefreshCw size={18} />} onClick={retryLoad}>Reintentar conexión</Button>}
+        />
       ) : model.areas.length === 0 ? (
         <EmptyState
           icon={<Layers3 size={30} />}
@@ -180,6 +217,8 @@ export function AreasTablesScreen() {
                 setEditingTable(table)
                 setTableDialogOpen(true)
               }}
+              onMoveArea={setMovingTable}
+              onQr={setQrTable}
               onToggle={requestTableToggle}
               onDelete={(table) => setConfirmation({
                 title: `Eliminar ${table.displayName}`,
@@ -190,7 +229,7 @@ export function AreasTablesScreen() {
                   if (await perform(() => model.deleteTable(table.id), 'Mesa eliminada.')) setConfirmation(null)
                 },
               })}
-              onMove={(table, direction) => void moveTable(table, direction)}
+              onReorder={(table, direction) => void moveTable(table, direction)}
             />
           )}
         </div>
@@ -203,25 +242,55 @@ export function AreasTablesScreen() {
         if (success) setAreaDialogOpen(false)
       }} />}
 
-      {tableDialogOpen && <TableDialog open table={editingTable} initialAreaId={selectedArea?.id ?? ''} areas={model.areas} saving={model.saving} onClose={() => setTableDialogOpen(false)} onSubmit={async (label, areaId) => {
+      {tableDialogOpen && <TableDialog open table={editingTable} saving={model.saving} onClose={() => setTableDialogOpen(false)} onSubmit={async (label) => {
+        if (!selectedArea) return
         const success = editingTable
-          ? await perform(() => model.updateTable(editingTable.id, { label, areaId }), 'Cambios guardados.')
-          : await perform(() => model.createTable(areaId, label), 'Mesa creada.')
+          ? await perform(() => model.updateTable(editingTable.id, { label }), 'Cambios guardados.')
+          : await perform(() => model.createTable(selectedArea.id, label), 'Mesa creada.')
         if (success) setTableDialogOpen(false)
       }} />}
+
+      {movingTable && <MoveTableDialog
+        open
+        table={movingTable}
+        areas={model.areas}
+        saving={model.saving}
+        onClose={() => setMovingTable(null)}
+        onSubmit={async (areaId) => {
+          const target = model.areas.find((area) => area.id === areaId)
+          const success = await perform(
+            () => model.moveTable(movingTable.id, areaId),
+            `${movingTable.displayName} movida a ${target?.name ?? 'otra área'}.`,
+          )
+          if (success) setMovingTable(null)
+        }}
+      />}
+
+      {qrTable && qrArea && (
+        <TableQrDialog
+          open
+          table={qrTable}
+          area={qrArea}
+          onClose={() => setQrTable(null)}
+        />
+      )}
 
       {bulkOpen && <BulkTablesDialog open tables={selectedArea?.tables ?? []} saving={model.saving} onClose={() => setBulkOpen(false)} onSubmit={async (from, to) => {
         if (!selectedArea) return
         try {
           const response = await model.bulkCreateTables(selectedArea.id, from, to)
-          toast.success(`${response.data.createdCount} mesas creadas.`)
+          toast.success(response.data.skippedCount > 0
+            ? `${response.data.createdCount} mesas creadas; ${response.data.skippedCount} ya existían.`
+            : `${response.data.createdCount} mesas creadas.`)
           setBulkOpen(false)
         } catch (error) {
           toast.error(getApiErrorMessage(error))
         }
       }} />}
 
-      <ConfirmDialog open={confirmation !== null} onClose={() => setConfirmation(null)} onConfirm={() => void confirmation?.action()} title={confirmation?.title ?? ''} description={confirmation?.description} confirmLabel={confirmation?.label} variant={confirmation?.danger ? 'danger' : 'default'} loading={model.saving} />
+      {confirmation && (
+        <ConfirmDialog open onClose={() => setConfirmation(null)} onConfirm={() => void confirmation.action()} title={confirmation.title} description={confirmation.description} confirmLabel={confirmation.label} variant={confirmation.danger ? 'danger' : 'default'} loading={model.saving} />
+      )}
     </div>
   )
 }

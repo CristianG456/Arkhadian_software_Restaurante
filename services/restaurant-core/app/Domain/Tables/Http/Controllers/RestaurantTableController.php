@@ -4,6 +4,7 @@ namespace App\Domain\Tables\Http\Controllers;
 
 use App\Domain\Areas\Models\Area;
 use App\Domain\Tables\Http\Requests\BulkStoreRestaurantTablesRequest;
+use App\Domain\Tables\Http\Requests\MoveRestaurantTableRequest;
 use App\Domain\Tables\Http\Requests\ReorderRestaurantTablesRequest;
 use App\Domain\Tables\Http\Requests\StoreRestaurantTableRequest;
 use App\Domain\Tables\Http\Requests\UpdateRestaurantTableRequest;
@@ -35,9 +36,26 @@ class RestaurantTableController extends Controller
         ], 201);
     }
 
+    public function show(Request $request, RestaurantTable $table): JsonResponse
+    {
+        return ApiResponse::success([
+            'table' => (new RestaurantTableResource($table))->resolve($request),
+        ]);
+    }
+
     public function update(UpdateRestaurantTableRequest $request, RestaurantTable $table): JsonResponse
     {
         $table = $this->service->update($table, $request->validated());
+
+        return ApiResponse::success([
+            'table' => (new RestaurantTableResource($table))->resolve($request),
+        ]);
+    }
+
+    public function move(MoveRestaurantTableRequest $request, RestaurantTable $table): JsonResponse
+    {
+        $targetArea = Area::query()->findOrFail($request->validated('areaId'));
+        $table = $this->service->move($table, $targetArea);
 
         return ApiResponse::success([
             'table' => (new RestaurantTableResource($table))->resolve($request),

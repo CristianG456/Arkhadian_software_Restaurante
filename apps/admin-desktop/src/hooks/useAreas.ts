@@ -51,21 +51,25 @@ export function useAreas() {
     }
   }
 
+  const refresh = useCallback(() => load(), [load])
+  const clearError = useCallback(() => setError(null), [])
+
   return {
     areas,
     loading,
     saving,
     error,
-    clearError: () => setError(null),
-    refresh: () => load(),
+    clearError,
+    refresh,
     createArea: (name: string) => mutate(() => areasApi.createArea(name)),
     updateArea: (id: string, changes: { name?: string; isActive?: boolean }) =>
       mutate(() => areasApi.updateArea(id, changes)),
     deleteArea: (id: string) => mutate(() => areasApi.deleteArea(id)),
     reorderAreas: (ids: string[]) => mutate(() => areasApi.reorderAreas(ids)),
     createTable: (areaId: string, label: string) => mutate(() => tablesApi.createTable(areaId, label)),
-    updateTable: (id: string, changes: { label?: string; areaId?: string; isActive?: boolean }) =>
+    updateTable: (id: string, changes: { label?: string; isActive?: boolean }) =>
       mutate(() => tablesApi.updateTable(id, changes)),
+    moveTable: (id: string, areaId: string) => mutate(() => tablesApi.moveTable(id, areaId)),
     deleteTable: (id: string) => mutate(() => tablesApi.deleteTable(id)),
     bulkCreateTables: (areaId: string, from: number, to: number) =>
       mutate(() => tablesApi.bulkCreateTables(areaId, from, to)),

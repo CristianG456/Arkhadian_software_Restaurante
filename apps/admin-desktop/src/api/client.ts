@@ -34,13 +34,19 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
 
   let response: Response
   try {
+    const isFormData = options.body instanceof FormData
+    const requestBody: BodyInit | undefined = options.body === undefined
+      ? undefined
+      : isFormData
+        ? (options.body as FormData)
+        : JSON.stringify(options.body)
     response = await fetch(`${env.coreBaseUrl}${path}`, {
       method: options.method ?? 'GET',
       headers: {
         Accept: 'application/json',
-        ...(options.body === undefined ? {} : { 'Content-Type': 'application/json' }),
+        ...(options.body === undefined || isFormData ? {} : { 'Content-Type': 'application/json' }),
       },
-      body: options.body === undefined ? undefined : JSON.stringify(options.body),
+      body: requestBody,
       signal: controller.signal,
     })
   } catch (cause) {

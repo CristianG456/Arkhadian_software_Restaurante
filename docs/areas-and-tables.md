@@ -53,3 +53,33 @@ descartable:
 `DatabaseSeeder` crea ejemplos de salón, VIP, terraza y mesas solo en los
 entornos `local` y `testing`. No existen áreas obligatorias de producción y
 el seeder es idempotente.
+
+## Límites de operación
+
+RestaurantTable representa configuración física. Nunca guarda ocupación,
+mesero, pedidos, cliente ni total. Mover una mesa a otra área cambia su
+configuración; trasladar un consumo futuro cambiará TableSession.table_id y
+no moverá la mesa física.
+
+La normalización es conservadora: 04 y 4 siguen siendo etiquetas distintas,
+igual que A01 y A1. Frontend valida para UX, Form Requests validan la API y
+los constraints PostgreSQL son la autoridad final ante concurrencia.
+
+## Credenciales QR
+
+TableQrCredential mantiene una identidad opaca y revocable separada de
+RestaurantTable y de las futuras TableSession y CustomerSession.
+
+- El token contiene 256 bits aleatorios y no deriva de IDs o nombres.
+- Un índice único parcial permite una sola credencial active por mesa.
+- Regenerar revoca la anterior y crea una nueva versión en una transacción.
+- Revocar invalida el QR inmediatamente en la autoridad local.
+- Renombrar área o mesa no cambia la identidad de la credencial.
+
+TABLE_QR_PUBLIC_BASE_URL configura el prefijo público codificado. La subweb,
+las sesiones y los pedidos por QR permanecen fuera de este módulo.
+
+Los endpoints de QR viven bajo /api/tables/{table}/qr, con operaciones
+regenerate y revoke. Mover configuración usa /api/tables/{table}/move.
+Todos conservan el envelope estándar y nunca exponen SQLSTATE ni tokens en
+logs normales.

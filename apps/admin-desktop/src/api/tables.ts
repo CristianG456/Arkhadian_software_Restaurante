@@ -8,9 +8,16 @@ export function createTable(areaId: string, label: string) {
   })
 }
 
-export function updateTable(id: string, changes: { label?: string; areaId?: string; isActive?: boolean }) {
+export function updateTable(id: string, changes: { label?: string; isActive?: boolean }) {
   return apiRequest<ApiSuccess<{ table: RestaurantTable }>>(`/api/tables/${id}`, {
     method: 'PUT', body: changes,
+  })
+}
+
+export function moveTable(id: string, areaId: string) {
+  return apiRequest<ApiSuccess<{ table: RestaurantTable }>>(`/api/tables/${id}/move`, {
+    method: 'POST',
+    body: { areaId },
   })
 }
 

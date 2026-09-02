@@ -12,6 +12,8 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
+. (Join-Path $PSScriptRoot 'resolve-php.ps1')
+$php = Resolve-ProjectPhp
 $root = Split-Path -Parent $PSScriptRoot
 $core = Join-Path $root 'services\restaurant-core'
 
@@ -27,5 +29,5 @@ if (-not $Force) {
 }
 
 Push-Location $core
-php artisan migrate:fresh --seed
+& $php artisan migrate:fresh --seed
 Pop-Location

@@ -11,6 +11,8 @@
   production.
 #>
 $ErrorActionPreference = 'Stop'
+. (Join-Path $PSScriptRoot 'resolve-php.ps1')
+$null = Resolve-ProjectPhp
 $root = Split-Path -Parent $PSScriptRoot
 $core = Join-Path $root 'services\restaurant-core'
 $admin = Join-Path $root 'apps\admin-desktop'

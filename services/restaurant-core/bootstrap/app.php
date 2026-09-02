@@ -1,11 +1,15 @@
 <?php
 
+use App\Http\Middleware\AuthenticatedWaiter;
+use App\Http\Middleware\LocalAdminOnly;
+use App\Http\Middleware\PairedWaiterDevice;
 use App\Support\Http\ApiException;
 use App\Support\Http\ApiResponse;
 use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\Exceptions\ThrottleRequestsException;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
@@ -19,7 +23,7 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        $middleware->alias(['local.admin' => LocalAdminOnly::class, 'waiter.device' => PairedWaiterDevice::class, 'waiter.auth' => AuthenticatedWaiter::class]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(
@@ -47,6 +51,14 @@ return Application::configure(basePath: dirname(__DIR__))
                 $e->validator->errors()->first() ?: 'Los datos enviados no son válidos.',
                 422,
             );
+        });
+
+        $exceptions->render(function (ThrottleRequestsException $e, Request $request) {
+            if (! $request->is('api/*')) {
+                return null;
+            }
+
+            return ApiResponse::error('RATE_LIMITED', 'Demasiados intentos. Espera un minuto e inténtalo nuevamente.', 429);
         });
 
         $exceptions->render(function (QueryException $e, Request $request) {

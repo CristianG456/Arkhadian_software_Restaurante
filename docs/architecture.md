@@ -240,7 +240,7 @@ would be dead code with nothing to produce or consume it.
   local origins only.
 - `.env` is never committed; `.env.example` documents every key with no
   real secrets.
-- No authentication yet — deliberately out of scope for this phase (see
+- Waiter authentication and paired-device authorization are implemented; the old phase note below is retained only as historical context (see
   the product brief's "not implemented yet" list). `config/auth.php`
   is left inert (no `AUTH_MODEL`) rather than pointed at a placeholder.
 
@@ -254,6 +254,12 @@ would be dead code with nothing to produce or consume it.
   (`src/main.tsx`) so communication/runtime errors are diagnosable after
   the window is closed — the same data a future "Ayuda → Diagnóstico"
   screen would read.
+
+## Waiter mobile
+
+`apps/waiter-mobile` is a Flutter app for Android and iOS. It talks only to Restaurant Core: it never connects directly to PostgreSQL or printers, and Core remains authoritative for identity, table ownership, prices, permissions, orders, transfers and print jobs.
+
+Its trust chain separates a public Restaurant Code, a short-lived one-use pairing credential, an opaque revocable device credential, and an expiring waiter access token tied to that device. The app is Local-First but has no offline order queue: Internet may be absent while local Core remains reachable; if Core is unavailable the operational UI blocks and retries. Details are in `docs/waiter-app.md`.
 
 ## Deviations from the initial structure sketch
 

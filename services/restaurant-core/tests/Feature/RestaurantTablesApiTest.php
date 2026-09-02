@@ -34,7 +34,7 @@ class RestaurantTablesApiTest extends TestCase
         $salon = Area::factory()->create();
         $this->postJson('/api/areas/'.$vip->id.'/tables', ['label' => '4'])->assertCreated();
         $this->postJson('/api/areas/'.$vip->id.'/tables', ['label' => '  MESA 4 '])
-            ->assertConflict()->assertJsonPath('error.code', 'TABLE_LABEL_DUPLICATE');
+            ->assertUnprocessable()->assertJsonPath('error.code', 'VALIDATION_ERROR');
         $this->postJson('/api/areas/'.$salon->id.'/tables', ['label' => '4'])->assertCreated();
     }
 
@@ -45,10 +45,12 @@ class RestaurantTablesApiTest extends TestCase
         $table = RestaurantTable::factory()->create(['area_id' => $source->id]);
 
         $this->putJson('/api/tables/'.$table->id, [
-            'label' => 'A2', 'areaId' => $target->id, 'isActive' => false,
+            'label' => 'A2', 'isActive' => false,
         ])->assertOk()
-            ->assertJsonPath('data.table.areaId', $target->id)
             ->assertJsonPath('data.table.isActive', false);
+        $this->postJson('/api/tables/'.$table->id.'/move', ['areaId' => $target->id])
+            ->assertOk()
+            ->assertJsonPath('data.table.areaId', $target->id);
         $this->putJson('/api/tables/'.$table->id, ['isActive' => true])
             ->assertOk()->assertJsonPath('data.table.isActive', true);
     }
@@ -64,8 +66,8 @@ class RestaurantTablesApiTest extends TestCase
             'area_id' => $target->id, 'label' => '4', 'normalized_label' => '4',
         ]);
 
-        $this->putJson('/api/tables/'.$moving->id, ['areaId' => $target->id])
-            ->assertConflict()->assertJsonPath('error.code', 'TABLE_LABEL_DUPLICATE');
+        $this->postJson('/api/tables/'.$moving->id.'/move', ['areaId' => $target->id])
+            ->assertConflict()->assertJsonPath('error.code', 'TABLE_TARGET_AREA_CONFLICT');
     }
 
     public function test_bulk_create_reports_existing_tables_without_overwriting_them(): void
@@ -103,5 +105,38 @@ class RestaurantTablesApiTest extends TestCase
 
         $this->deleteJson('/api/tables/'.$first->id)->assertOk();
         $this->assertDatabaseMissing('restaurant_tables', ['id' => $first->id]);
+    }
+
+    public function test_validates_duplicate_when_editing_label(): void
+    {
+        $area = Area::factory()->create();
+        $first = RestaurantTable::factory()->create([
+            'area_id' => $area->id,
+            'label' => 'A1',
+            'normalized_label' => 'a1',
+        ]);
+        $second = RestaurantTable::factory()->create([
+            'area_id' => $area->id,
+            'label' => 'A2',
+            'normalized_label' => 'a2',
+        ]);
+
+        $this->putJson('/api/tables/'.$second->id, ['label' => ' mesa A1 '])
+            ->assertUnprocessable()
+            ->assertJsonPath('error.code', 'VALIDATION_ERROR');
+        $this->assertDatabaseHas('restaurant_tables', ['id' => $first->id, 'label' => 'A1']);
+        $this->assertDatabaseHas('restaurant_tables', ['id' => $second->id, 'label' => 'A2']);
+    }
+
+    public function test_shows_table_and_returns_clean_404_envelope(): void
+    {
+        $table = RestaurantTable::factory()->create();
+        $this->getJson('/api/tables/'.$table->id)
+            ->assertOk()
+            ->assertJsonPath('data.table.id', $table->id);
+
+        $this->getJson('/api/tables/01J00000000000000000000000')
+            ->assertNotFound()
+            ->assertJsonPath('error.code', 'NOT_FOUND');
     }
 }

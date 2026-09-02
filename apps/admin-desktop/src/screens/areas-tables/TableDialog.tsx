@@ -1,25 +1,21 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
-import type { Area, RestaurantTable } from '../../api/areas'
+import type { RestaurantTable } from '../../api/areas'
 import { Button } from '../../components/ui/Button'
 import { Dialog } from '../../components/ui/Dialog'
 import { Input } from '../../components/ui/Input'
-import { Select } from '../../components/ui/Select'
 
 interface TableDialogProps {
   open: boolean
   table?: RestaurantTable | null
-  initialAreaId: string
-  areas: Area[]
   saving: boolean
   onClose: () => void
-  onSubmit: (label: string, areaId: string) => Promise<void>
+  onSubmit: (label: string) => Promise<void>
 }
 
 export function TableDialog(props: TableDialogProps) {
-  const { open, table, initialAreaId, areas, saving, onClose, onSubmit } = props
+  const { open, table, saving, onClose, onSubmit } = props
   const [label, setLabel] = useState(table?.label ?? '')
-  const [areaId, setAreaId] = useState(table?.areaId ?? initialAreaId)
   const [error, setError] = useState('')
 
   async function submit(event?: FormEvent) {
@@ -28,7 +24,7 @@ export function TableDialog(props: TableDialogProps) {
       setError('Escribe el número o nombre de la mesa.')
       return
     }
-    await onSubmit(label, areaId)
+    await onSubmit(label)
   }
 
   return (
@@ -59,14 +55,6 @@ export function TableDialog(props: TableDialogProps) {
           maxLength={50}
           placeholder='Ej. 4 o A1'
         />
-        {table && (
-          <Select
-            label='Área'
-            value={areaId}
-            onChange={(event) => setAreaId(event.target.value)}
-            options={areas.map((area) => ({ value: area.id, label: area.name }))}
-          />
-        )}
       </form>
     </Dialog>
   )

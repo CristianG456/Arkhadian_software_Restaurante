@@ -6,6 +6,9 @@ import type { ScreenKey } from './navigation'
 import { HomeScreen } from '../screens/HomeScreen'
 import { AreasTablesScreen } from '../screens/areas-tables/AreasTablesScreen'
 import { SettingsScreen } from '../screens/settings/SettingsScreen'
+import { ProductsScreen } from '../screens/catalog/ProductsScreen'
+import { OrdersScreen } from '../screens/orders/OrdersScreen'
+import { ProductionScreen } from '../screens/production/ProductionScreen'
 import { LoadingState } from '../components/ui/Spinner'
 import './AppShell.css'
 
@@ -65,6 +68,9 @@ export function AppShell() {
           )}
           {activeScreen === 'home' && <HomeScreen />}
           {activeScreen === 'areas-mesas' && <AreasTablesScreen />}
+          {activeScreen === 'pedidos' && <OrdersScreen />}
+          {activeScreen === 'produccion' && <ProductionScreen />}
+          {activeScreen === 'productos' && <ProductsScreen />}
           {activeScreen === 'settings' && <SettingsScreen />}
         </main>
       </div>

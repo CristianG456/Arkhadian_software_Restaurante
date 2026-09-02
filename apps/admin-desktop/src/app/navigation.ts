@@ -34,9 +34,9 @@ export interface NavItem {
 export const NAV_ITEMS: NavItem[] = [
   { key: 'home', label: 'Inicio', icon: Home, enabled: true },
   { key: 'areas-mesas', label: 'Áreas y mesas', icon: LayoutGrid, enabled: true },
-  { key: 'pedidos', label: 'Pedidos', icon: ClipboardList, enabled: false },
-  { key: 'productos', label: 'Productos', icon: UtensilsCrossed, enabled: false },
-  { key: 'produccion', label: 'Producción', icon: ChefHat, enabled: false },
+  { key: 'pedidos', label: 'Pedidos', icon: ClipboardList, enabled: true },
+  { key: 'productos', label: 'Productos', icon: UtensilsCrossed, enabled: true },
+  { key: 'produccion', label: 'Producción', icon: ChefHat, enabled: true },
   { key: 'caja', label: 'Caja', icon: Wallet, enabled: false },
   { key: 'inventario', label: 'Inventario', icon: Package, enabled: false },
   { key: 'reportes', label: 'Reportes', icon: BarChart3, enabled: false },

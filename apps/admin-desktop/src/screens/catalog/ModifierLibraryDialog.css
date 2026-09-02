@@ -1,0 +1,10 @@
+.modifier-groups { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; }
+.modifier-group { display: flex; align-items: center; border: 1px solid var(--color-border); border-radius: 12px; padding: 5px 8px 5px 5px; }
+.modifier-group--selected { border-color: var(--color-primary); background: var(--color-primary-subtle); }
+.modifier-group__select { flex: 1; min-height: 58px; border: 0; background: transparent; text-align: left; padding: 8px; display: flex; align-items: center; justify-content: space-between; gap: 8px; cursor: pointer; }
+.modifier-group__select strong, .modifier-group__select small { display: block; }
+.modifier-group__select small { margin-top: 4px; color: var(--color-text-secondary); }
+.modifier-options { display: flex; flex-direction: column; gap: 14px; border-top: 1px solid var(--color-border); padding-top: 18px; }
+.modifier-options__heading h3, .modifier-options__heading p { margin: 0; }
+.modifier-options__heading p, .modifier-options__empty { color: var(--color-text-secondary); }
+.modifier-options__empty { padding: 20px; border: 1px dashed var(--color-border); border-radius: 10px; text-align: center; }

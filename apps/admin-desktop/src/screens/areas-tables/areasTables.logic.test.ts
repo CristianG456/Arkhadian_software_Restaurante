@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { RestaurantTable } from '../../api/areas'
-import { bulkPreview, filterTables, moveId } from './areasTables.logic'
+import { bulkPreview, filterAreas, filterTables, moveId, tableEmptyStateTitle } from './areasTables.logic'
 
 function table(label: string, isActive = true): RestaurantTable {
   return { id: label, areaId: 'area', label, displayName: `Mesa ${label}`, sortOrder: 1, isActive, createdAt: '', updatedAt: '' }
@@ -25,5 +25,21 @@ describe('areas and tables UI logic', () => {
   it('moves one id while preserving the complete sequence', () => {
     expect(moveId(['a', 'b', 'c'], 'b', -1)).toEqual(['b', 'a', 'c'])
     expect(moveId(['a', 'b', 'c'], 'a', -1)).toEqual(['a', 'b', 'c'])
+  })
+
+  it('keeps an area visible when it still matches the selected filter', () => {
+    const areas = [
+      { id: 'active', isActive: true },
+      { id: 'inactive', isActive: false },
+    ] as Parameters<typeof filterAreas>[0]
+
+    expect(filterAreas(areas, 'active').map((area) => area.id)).toEqual(['active'])
+    expect(filterAreas(areas, 'all').map((area) => area.id)).toEqual(['active', 'inactive'])
+  })
+
+  it('describes empty and filtered table states precisely', () => {
+    expect(tableEmptyStateTitle(0, '', 'active')).toBe('Esta área todavía no tiene mesas')
+    expect(tableEmptyStateTitle(4, '', 'inactive')).toBe('No hay mesas desactivadas en esta área')
+    expect(tableEmptyStateTitle(4, 'VIP', 'all')).toBe('No encontramos mesas')
   })
 })

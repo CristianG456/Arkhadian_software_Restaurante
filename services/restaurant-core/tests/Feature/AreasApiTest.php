@@ -85,4 +85,14 @@ class AreasApiTest extends TestCase
             ['id' => $second->id, 'sortOrder' => 1],
         ]])->assertOk()->assertJsonPath('data.areas.0.id', $second->id);
     }
+
+    public function test_reorder_rejects_incomplete_area_set(): void
+    {
+        $first = Area::factory()->create(['sort_order' => 1]);
+        Area::factory()->create(['sort_order' => 2]);
+
+        $this->postJson('/api/areas/reorder', ['items' => [
+            ['id' => $first->id, 'sortOrder' => 1],
+        ]])->assertUnprocessable()->assertJsonPath('error.code', 'INVALID_AREA_ORDER');
+    }
 }

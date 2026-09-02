@@ -30,12 +30,16 @@ final class AreaService
         $name = LabelNormalizer::display($name);
 
         try {
-            $area = DB::transaction(fn (): Area => Area::query()->create([
-                'name' => $name,
-                'normalized_name' => LabelNormalizer::comparable($name),
-                'sort_order' => ((int) Area::query()->max('sort_order')) + 1,
-                'is_active' => true,
-            ]));
+            $area = DB::transaction(function () use ($name): Area {
+                DB::select('select pg_advisory_xact_lock(hashtext(?))', ['areas-sort-order']);
+
+                return Area::query()->create([
+                    'name' => $name,
+                    'normalized_name' => LabelNormalizer::comparable($name),
+                    'sort_order' => ((int) Area::query()->max('sort_order')) + 1,
+                    'is_active' => true,
+                ]);
+            });
         } catch (QueryException $exception) {
             $this->throwDuplicateName($exception);
         }
@@ -88,13 +92,14 @@ final class AreaService
 
     public function reorder(array $items): Collection
     {
-        $requestedIds = collect($items)->pluck('id')->sort()->values()->all();
-        $currentIds = Area::query()->pluck('id')->sort()->values()->all();
-        if ($requestedIds !== $currentIds) {
-            throw new ApiException('INVALID_AREA_ORDER', 'El orden debe incluir todas las áreas una sola vez.', 422);
-        }
-
         DB::transaction(function () use ($items): void {
+            DB::select('select pg_advisory_xact_lock(hashtext(?))', ['areas-sort-order']);
+            $requestedIds = collect($items)->pluck('id')->sort()->values()->all();
+            $currentIds = Area::query()->lockForUpdate()->pluck('id')->sort()->values()->all();
+            if ($requestedIds !== $currentIds) {
+                throw new ApiException('INVALID_AREA_ORDER', 'El orden debe incluir todas las áreas una sola vez.', 422);
+            }
+
             foreach ($items as $item) {
                 Area::query()->whereKey($item['id'])->update(['sort_order' => $item['sortOrder']]);
             }
