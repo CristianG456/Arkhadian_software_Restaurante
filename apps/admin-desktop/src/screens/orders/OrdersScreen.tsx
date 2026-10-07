@@ -1,6 +1,8 @@
 import { Plus, RefreshCw, UserRound, UsersRound } from 'lucide-react'
 import { useState } from 'react'
 import type { OperationTable, TableSession } from '../../api/operations'
+import { isInfrastructureError } from '../../api/ApiClientError'
+import { useSystemStatusContext } from '../../app/SystemStatusContext'
 import { Alert } from '../../components/ui/Alert'
 import { Badge } from '../../components/ui/Badge'
 import { Button } from '../../components/ui/Button'
@@ -15,15 +17,16 @@ import './OrdersScreen.css'
 
 export function OrdersScreen() {
   const model = useOrdersOperation(); const toast = useToast()
+  const system = useSystemStatusContext(); const available = system.snapshot.localOperationAvailable
   const [areaId, setAreaId] = useState<string | null>(null)
   const [builderTable, setBuilderTable] = useState<OperationTable | null>(null)
   const [session, setSession] = useState<TableSession | null>(null)
   const [staffOpen, setStaffOpen] = useState(false)
   const area = model.areas.find((item) => item.id === areaId) ?? model.areas[0] ?? null
   async function openTable(table: OperationTable) {
-    if (model.error) { toast.error('Reconectando con Restaurant Core. Intenta nuevamente en unos segundos.'); return }
+    if (!available || model.error) return
     if (!table.session) { setBuilderTable(table); return }
-    try { setSession((await model.fetchSession(table.session.id)).data.session) } catch (error) { toast.error(operationError(error)) }
+    try { setSession((await model.fetchSession(table.session.id)).data.session) } catch (error) { if (!isInfrastructureError(error)) toast.error(operationError(error)) }
   }
   async function refreshSession() { if (session) setSession((await model.fetchSession(session.id)).data.session) }
   if (model.loading) return <LoadingState label="Cargando operación de mesas..." />

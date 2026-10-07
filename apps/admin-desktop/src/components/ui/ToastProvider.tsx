@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import { AlertTriangle, CheckCircle2, Info, X, XCircle } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { cx } from '../../utils/cx'
+import { upsertToast } from './toast.logic'
 import './Toast.css'
 
 export type ToastVariant = 'success' | 'info' | 'warning' | 'error'
@@ -15,7 +16,8 @@ interface ToastItem {
 }
 
 interface ToastContextValue {
-  push: (variant: ToastVariant, message: string, duration?: number) => void
+  push: (variant: ToastVariant, message: string, duration?: number, id?: string) => string
+  dismiss: (id: string) => void
 }
 
 const ToastContext = createContext<ToastContextValue | null>(null)
@@ -43,20 +45,23 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   const dismiss = useCallback((id: string) => {
     setToasts((current) => current.filter((toast) => toast.id !== id))
     const timerId = timers.current.get(id)
-    if (timerId) {
+    if (timerId !== undefined) {
       window.clearTimeout(timerId)
       timers.current.delete(id)
     }
   }, [])
 
   const push = useCallback(
-    (variant: ToastVariant, message: string, duration?: number) => {
-      const id = `toast-${++nextId}`
+    (variant: ToastVariant, message: string, duration?: number, stableId?: string) => {
+      const id = stableId ?? `toast-${++nextId}`
       const resolvedDuration = duration ?? DEFAULT_DURATION[variant]
-      setToasts((current) => [...current, { id, variant, message, duration: resolvedDuration }])
+      const existingTimer = timers.current.get(id)
+      if (existingTimer !== undefined) window.clearTimeout(existingTimer)
+      setToasts((current) => upsertToast(current, { id, variant, message, duration: resolvedDuration }))
 
       const timerId = window.setTimeout(() => dismiss(id), resolvedDuration)
       timers.current.set(id, timerId)
+      return id
     },
     [dismiss],
   )
@@ -69,7 +74,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   }, [])
 
   return (
-    <ToastContext.Provider value={{ push }}>
+    <ToastContext.Provider value={{ push, dismiss }}>
       {children}
       <div className="toast-viewport" role="region" aria-label="Notificaciones">
         {toasts.map((toast) => {
@@ -103,9 +108,12 @@ export function useToast() {
   if (!ctx) throw new Error('useToast debe usarse dentro de <ToastProvider>')
 
   return {
-    success: (message: string, duration?: number) => ctx.push('success', message, duration),
-    info: (message: string, duration?: number) => ctx.push('info', message, duration),
-    warning: (message: string, duration?: number) => ctx.push('warning', message, duration),
-    error: (message: string, duration?: number) => ctx.push('error', message, duration),
+    show: (options: { id?: string; variant: ToastVariant; message: string; duration?: number }) =>
+      ctx.push(options.variant, options.message, options.duration, options.id),
+    dismiss: ctx.dismiss,
+    success: (message: string, duration?: number, id?: string) => ctx.push('success', message, duration, id),
+    info: (message: string, duration?: number, id?: string) => ctx.push('info', message, duration, id),
+    warning: (message: string, duration?: number, id?: string) => ctx.push('warning', message, duration, id),
+    error: (message: string, duration?: number, id?: string) => ctx.push('error', message, duration, id),
   }
 }

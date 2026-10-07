@@ -18,19 +18,18 @@ function isErrorEnvelope(body: unknown): body is ApiErrorBody {
   )
 }
 
-/**
- * The only place in Admin Desktop allowed to call `fetch` against
- * Restaurant Core. Centralizes the base URL, timeout, JSON parsing and
- * error classification so components never touch any of that directly.
- */
+/** The only place in Admin Desktop allowed to call fetch against Core. */
 export async function apiRequest<T>(path: string, options: RequestOptions = {}): Promise<T> {
   const controller = new AbortController()
   const timeoutMs = options.timeoutMs ?? env.requestTimeoutMs
-  const timeoutId = setTimeout(() => controller.abort(), timeoutMs)
+  let timedOut = false
+  const timeoutId = setTimeout(() => {
+    timedOut = true
+    controller.abort()
+  }, timeoutMs)
 
-  if (options.signal) {
-    options.signal.addEventListener('abort', () => controller.abort(), { once: true })
-  }
+  const abortFromCaller = () => controller.abort()
+  options.signal?.addEventListener('abort', abortFromCaller, { once: true })
 
   let response: Response
   try {
@@ -40,7 +39,7 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
       : isFormData
         ? (options.body as FormData)
         : JSON.stringify(options.body)
-    response = await fetch(`${env.coreBaseUrl}${path}`, {
+    response = await fetch(env.coreBaseUrl + path, {
       method: options.method ?? 'GET',
       headers: {
         Accept: 'application/json',
@@ -50,19 +49,23 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
       signal: controller.signal,
     })
   } catch (cause) {
-    if (controller.signal.aborted) {
-      throw new ApiClientError('timeout', `Timed out requesting ${path}`, { cause })
+    if (timedOut) {
+      throw new ApiClientError('timeout', 'Timed out requesting ' + path, { cause })
     }
-    throw new ApiClientError('network', `Network error requesting ${path}`, { cause })
+    if (options.signal?.aborted) {
+      throw new ApiClientError('cancelled', 'Cancelled request to ' + path, { cause })
+    }
+    throw new ApiClientError('network', 'Network error requesting ' + path, { cause })
   } finally {
     clearTimeout(timeoutId)
+    options.signal?.removeEventListener('abort', abortFromCaller)
   }
 
   let body: unknown
   try {
     body = await response.json()
   } catch (cause) {
-    throw new ApiClientError('invalid_response', `Non-JSON response from ${path}`, {
+    throw new ApiClientError('invalid_response', 'Non-JSON response from ' + path, {
       status: response.status,
       cause,
     })
@@ -76,7 +79,7 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
       })
     }
 
-    throw new ApiClientError('http', `Request to ${path} failed with HTTP ${response.status}`, {
+    throw new ApiClientError('http', 'Request to ' + path + ' failed with HTTP ' + response.status, {
       status: response.status,
     })
   }

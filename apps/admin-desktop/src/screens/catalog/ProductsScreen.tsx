@@ -1,6 +1,7 @@
 import { Copy, MoreVertical, PackageOpen, Pencil, Plus, RefreshCw, Trash2 } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import type { Product, ProductChannel } from '../../api/catalog'
+import { isInfrastructureError } from '../../api/ApiClientError'
 import { env } from '../../config/env'
 import { useSystemStatusContext } from '../../app/SystemStatusContext'
 import { ActionMenu } from '../../components/ui/ActionMenu'
@@ -26,8 +27,8 @@ export function ProductsScreen() {
   const products = useMemo(() => (category?.products ?? []).filter((p) => p.name.toLocaleLowerCase().includes(query.trim().toLocaleLowerCase())), [category, query])
   const databaseOnline = system.connectivity === 'ONLINE' && system.data?.database.status === 'connected'; const disabled = !databaseOnline || model.saving
 
-  async function run(action: () => Promise<unknown>, message: string) { try { await action(); toast.success(message); return true } catch (error) { toast.error(catalogError(error)); return false } }
-  async function openDetail(product: Product) { try { const response = await model.fetchProduct(product.id); setDetail(response.data.product) } catch (error) { toast.error(catalogError(error)) } }
+  async function run(action: () => Promise<unknown>, message: string) { try { await action(); toast.success(message); return true } catch (error) { if (!isInfrastructureError(error)) toast.error(catalogError(error)); return false } }
+  async function openDetail(product: Product) { try { const response = await model.fetchProduct(product.id); setDetail(response.data.product) } catch (error) { if (!isInfrastructureError(error)) toast.error(catalogError(error)) } }
   async function mutateDetail(action: () => Promise<unknown>, message: string) { if (!detail) return; if (await run(action, message)) await openDetail(detail) }
 
   if (model.loading) return <LoadingState label='Cargando catálogo...' />

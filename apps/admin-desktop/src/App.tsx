@@ -6,11 +6,11 @@ import { AppShell } from './app/AppShell'
 function App() {
   return (
     <ErrorBoundary>
-      <SystemStatusProvider>
-        <ToastProvider>
+      <ToastProvider>
+        <SystemStatusProvider>
           <AppShell />
-        </ToastProvider>
-      </SystemStatusProvider>
+        </SystemStatusProvider>
+      </ToastProvider>
     </ErrorBoundary>
   )
 }

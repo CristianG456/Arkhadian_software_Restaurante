@@ -1,11 +1,22 @@
 import { useCallback, useEffect, useState } from 'react'
 import * as api from '../api/production'
 import { operationError } from './useOrdersOperation'
+import { useSystemStatusContext } from '../app/SystemStatusContext'
 export function useProduction() {
+  const system = useSystemStatusContext(); const available = system.snapshot.localOperationAvailable
   const [centers, setCenters] = useState<api.ProductionCenter[]>([]); const [printers, setPrinters] = useState<api.Printer[]>([]); const [jobs, setJobs] = useState<api.PrintJob[]>([])
   const [loading, setLoading] = useState(true); const [saving, setSaving] = useState(false); const [error, setError] = useState<string | null>(null)
   const load = useCallback(async () => { try { const [c, p, j] = await Promise.all([api.fetchCenters(), api.fetchPrinters(), api.fetchPrintJobs()]); setCenters(c.data.centers); setPrinters(p.data.printers); setJobs(j.data.printJobs); setError(null) } catch (cause) { setError(operationError(cause)) } finally { setLoading(false) } }, [])
-  useEffect(() => { const id = window.setTimeout(() => void load(), 0); return () => window.clearTimeout(id) }, [load])
+  useEffect(() => {
+    if (!available) {
+      const unavailableId = window.setTimeout(() => {
+        if (system.connectivity !== 'CHECKING') setLoading(false)
+      }, 0)
+      return () => window.clearTimeout(unavailableId)
+    }
+    const id = window.setTimeout(() => void load(), 0)
+    return () => window.clearTimeout(id)
+  }, [available, load, system.connectivity])
   async function mutate<T>(action: () => Promise<T>) { setSaving(true); try { const value = await action(); await load(); return value } finally { setSaving(false) } }
   return { centers, printers, jobs, loading, saving, error, refresh: load,
     createCenter: (name: string) => mutate(() => api.createCenter(name)), updateCenter: (id: string, body: Parameters<typeof api.updateCenter>[1]) => mutate(() => api.updateCenter(id, body)),

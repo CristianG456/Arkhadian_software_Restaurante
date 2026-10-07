@@ -1,33 +1,25 @@
 import { useSystemStatusContext } from '../../app/SystemStatusContext'
-import type { ConnectivityState } from '../../hooks/useSystemStatus'
 import { Badge } from '../ui/Badge'
 import type { BadgeVariant } from '../ui/Badge'
 import './Topbar.css'
 
-const CONNECTIVITY_BADGE: Record<ConnectivityState, { variant: BadgeVariant; text: string }> = {
-  CHECKING: { variant: 'checking', text: 'Comprobando sistema' },
-  ONLINE: { variant: 'success', text: 'Sistema activo' },
-  OFFLINE: { variant: 'danger', text: 'Sistema sin conexión' },
-  ERROR: { variant: 'danger', text: 'Error del sistema' },
-}
-
-/**
- * Prepared for future content (restaurante activo, usuario, Local/Nube,
- * alertas, sesión - see docs) but only ever shows real or neutral data
- * today. The connectivity badge reuses the same polled state Diagnóstico
- * shows in full, so the two are never inconsistent with each other.
- *
- * Deliberately says "Sistema" here, not "Core" - that's implementation
- * detail for Diagnóstico, which does spell out "Restaurant Core".
- */
 export function Topbar() {
-  const { connectivity } = useSystemStatusContext()
-  const badge = CONNECTIVITY_BADGE[connectivity]
+  const { snapshot } = useSystemStatusContext()
+  const { core, database, internet } = snapshot.components
+  let badge: { variant: BadgeVariant; text: string }
+
+  if (core === 'CHECKING') badge = { variant: 'checking', text: 'Comprobando sistema' }
+  else if (core === 'OFFLINE') badge = { variant: 'danger', text: 'Sistema sin conexión' }
+  else if (core === 'ERROR') badge = { variant: 'danger', text: 'Error del sistema' }
+  else if (database === 'OFFLINE') badge = { variant: 'danger', text: 'Base de datos no disponible' }
+  else if (core === 'DEGRADED') badge = { variant: 'warning', text: 'Sistema degradado' }
+  else if (internet === 'OFFLINE') badge = { variant: 'warning', text: 'Operación local activa' }
+  else badge = { variant: 'success', text: 'Sistema activo' }
 
   return (
-    <header className="topbar">
-      <span className="topbar__brand">Restaurant Admin</span>
-      <div className="topbar__status">
+    <header className='topbar'>
+      <span className='topbar__brand'>Restaurant Admin</span>
+      <div className='topbar__status'>
         <Badge variant={badge.variant}>{badge.text}</Badge>
       </div>
     </header>

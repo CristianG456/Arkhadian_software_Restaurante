@@ -11,6 +11,30 @@
   min-height: 0;
 }
 
+.connectivity-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: 38px;
+  padding: var(--space-2) var(--space-4);
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-warning-bg);
+  color: var(--color-warning-text);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+}
+
+.connectivity-banner--danger {
+  background: var(--color-danger-bg);
+  color: var(--color-danger-text);
+}
+
+.connectivity-banner .btn {
+  margin-left: var(--space-2);
+}
+
 .app-shell__content {
   flex: 1;
   min-width: 0;

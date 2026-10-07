@@ -1,6 +1,7 @@
 import { Layers3, Plus, RefreshCw } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type { Area, RestaurantTable } from '../../api/areas'
+import { isInfrastructureError } from '../../api/ApiClientError'
 import { useSystemStatusContext } from '../../app/SystemStatusContext'
 import { Alert } from '../../components/ui/Alert'
 import { Button } from '../../components/ui/Button'
@@ -83,7 +84,7 @@ export function AreasTablesScreen() {
       toast.success(successMessage)
       return true
     } catch (error) {
-      toast.error(getApiErrorMessage(error))
+      if (!isInfrastructureError(error)) toast.error(getApiErrorMessage(error))
       return false
     }
   }
@@ -284,7 +285,7 @@ export function AreasTablesScreen() {
             : `${response.data.createdCount} mesas creadas.`)
           setBulkOpen(false)
         } catch (error) {
-          toast.error(getApiErrorMessage(error))
+          if (!isInfrastructureError(error)) toast.error(getApiErrorMessage(error))
         }
       }} />}
 

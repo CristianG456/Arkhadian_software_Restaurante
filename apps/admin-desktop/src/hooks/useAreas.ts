@@ -3,12 +3,15 @@ import * as areasApi from '../api/areas'
 import * as tablesApi from '../api/tables'
 import { ApiClientError } from '../api/ApiClientError'
 import type { Area } from '../api/areas'
+import { useSystemStatusContext } from '../app/SystemStatusContext'
 
 function userMessage(error: unknown): string {
   return error instanceof ApiClientError ? error.userMessage : 'No pudimos completar la operación.'
 }
 
 export function useAreas() {
+  const system = useSystemStatusContext()
+  const available = system.snapshot.localOperationAvailable
   const [areas, setAreas] = useState<Area[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -29,13 +32,19 @@ export function useAreas() {
   }, [])
 
   useEffect(() => {
+    if (!available) {
+      const unavailableId = window.setTimeout(() => {
+        if (system.connectivity !== 'CHECKING') setLoading(false)
+      }, 0)
+      return () => window.clearTimeout(unavailableId)
+    }
     const controller = new AbortController()
     const startId = window.setTimeout(() => void load(controller.signal), 0)
     return () => {
       window.clearTimeout(startId)
       controller.abort()
     }
-  }, [load])
+  }, [available, load, system.connectivity])
 
   async function mutate<T>(operation: () => Promise<T>): Promise<T> {
     setSaving(true)

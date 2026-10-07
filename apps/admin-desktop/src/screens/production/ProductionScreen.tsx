@@ -1,5 +1,7 @@
 import { Plus, Printer as PrinterIcon, RefreshCw, RotateCcw } from 'lucide-react'
 import { useState } from 'react'
+import { isInfrastructureError } from '../../api/ApiClientError'
+import { useSystemStatusContext } from '../../app/SystemStatusContext'
 import { Alert } from '../../components/ui/Alert'
 import { Badge } from '../../components/ui/Badge'
 import { Button } from '../../components/ui/Button'
@@ -13,8 +15,9 @@ import { useProduction } from '../../hooks/useProduction'
 import './ProductionScreen.css'
 export function ProductionScreen() {
   const model = useProduction(); const toast = useToast(); const [centerOpen, setCenterOpen] = useState(false); const [printerOpen, setPrinterOpen] = useState(false)
+  const system = useSystemStatusContext(); const available = system.snapshot.localOperationAvailable
   const [centerName, setCenterName] = useState(''); const [printerName, setPrinterName] = useState(''); const [driver, setDriver] = useState<'TEST_FILE' | 'WINDOWS_RAW_SHARE'>('WINDOWS_RAW_SHARE'); const [systemName, setSystemName] = useState(''); const [preaccount, setPreaccount] = useState(false)
-  async function run(action: () => Promise<unknown>, message: string) { try { await action(); toast.success(message); return true } catch (error) { toast.error(operationError(error)); return false } }
+  async function run(action: () => Promise<unknown>, message: string) { if (!available) return false; try { await action(); toast.success(message); return true } catch (error) { if (!isInfrastructureError(error)) toast.error(operationError(error)); return false } }
   if (model.loading) return <LoadingState label="Cargando Producción..." />
   return <div className="production-screen"><header className="production-header"><div><h1>Producción</h1><p>Configura centros, impresoras y revisa el envío persistente de comandas.</p></div><div><Button variant="outline" icon={<RefreshCw size={17} />} onClick={() => void model.refresh()}>Actualizar</Button><Button variant="outline" icon={<PrinterIcon size={17} />} onClick={() => setPrinterOpen(true)}>Nueva impresora</Button><Button icon={<Plus size={17} />} onClick={() => setCenterOpen(true)}>Nuevo centro</Button></div></header>
     {model.error && <Alert variant="danger" title="Producción no disponible">{model.error}</Alert>}

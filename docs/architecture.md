@@ -108,6 +108,37 @@ A Core that is merely slow to boot must not flash "sin conexión" for a
 few seconds. Failures inside the first `STARTUP_GRACE_MS` (6s) after
 mount keep showing `CHECKING` instead of jumping straight to `OFFLINE`.
 
+### Global connectivity monitor
+
+SystemStatusProvider is the only source of infrastructure connectivity state
+in Admin. It owns the only system-status polling loop and publishes independent
+states for Core, PostgreSQL, the local server and Internet. Screens consume
+useSystemStatusContext; no current or future module may create another health
+timer or emit CORE_UNAVAILABLE itself.
+
+The monitor uses a recursive timeout, so a new check never starts while the
+previous one is pending. Manual refresh aborts the obsolete request, and a
+sequence guard prevents an old response from overwriting a newer result.
+Normal polling is 5 seconds; consecutive Core failures back off through
+5/5/10/10/15/30 seconds and reset immediately after recovery. Effect cleanup
+cancels both the timer and active request, including React StrictMode's
+development mount/cleanup cycle.
+
+Infrastructure notifications are transition-driven. ONLINE to OFFLINE creates
+one keyed CORE_UNAVAILABLE toast; repeated offline snapshots create none.
+Closing that toast does not recreate it during the same incident. Recovery
+dismisses the error and may show one short success toast. PostgreSQL uses its
+own keyed transition, while Internet loss never creates an intrusive toast.
+
+Local-First availability is derived from Core + PostgreSQL + the local server,
+not Internet. Therefore Core online + database online + Internet offline is
+fully operational and is labelled Operación local activa.
+
+Feature screens must distinguish an empty successful response from a failed
+load. Infrastructure errors belong in the global banner and an inline screen
+state; only domain/validation errors caused by a user action should produce a
+module-specific toast.
+
 ## Admin Desktop frontend structure
 
 ```

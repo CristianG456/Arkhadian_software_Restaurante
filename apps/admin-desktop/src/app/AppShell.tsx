@@ -2,6 +2,7 @@ import { Suspense, lazy, useState } from 'react'
 import { LayoutTemplate } from 'lucide-react'
 import { Sidebar } from '../components/layout/Sidebar'
 import { Topbar } from '../components/layout/Topbar'
+import { ConnectivityBanner } from '../components/layout/ConnectivityBanner'
 import type { ScreenKey } from './navigation'
 import { HomeScreen } from '../screens/HomeScreen'
 import { AreasTablesScreen } from '../screens/areas-tables/AreasTablesScreen'
@@ -53,6 +54,7 @@ export function AppShell() {
   return (
     <div className="app-shell">
       <Topbar />
+      <ConnectivityBanner />
       <div className="app-shell__body">
         <Sidebar
           activeKey={activeScreen === 'dev-showcase' ? 'home' : activeScreen}

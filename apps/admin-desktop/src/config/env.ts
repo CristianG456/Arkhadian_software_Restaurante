@@ -22,6 +22,9 @@ export const env = {
   /** How often the status screen re-polls Core, in milliseconds. */
   statusPollIntervalMs: readNumber('VITE_STATUS_POLL_INTERVAL_MS', 5000),
 
+  /** Maximum reconnect delay while Core remains unavailable. */
+  statusPollMaxIntervalMs: readNumber('VITE_STATUS_POLL_MAX_INTERVAL_MS', 30000),
+
   /** Per-request timeout before a call to Core is treated as unreachable. */
   requestTimeoutMs: readNumber('VITE_CORE_REQUEST_TIMEOUT_MS', 3000),
 

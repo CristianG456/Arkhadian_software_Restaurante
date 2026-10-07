@@ -13,8 +13,8 @@ function formatTime(date: Date | null): string {
  * real modules to exist first (see docs/architecture.md Phase 2 scope).
  */
 export function HomeScreen() {
-  const { connectivity, lastCheckedAt } = useSystemStatusContext()
-  const systemAvailable = connectivity === 'ONLINE'
+  const { snapshot, lastCheckedAt } = useSystemStatusContext()
+  const systemAvailable = snapshot.localOperationAvailable
 
   return (
     <div className="home">

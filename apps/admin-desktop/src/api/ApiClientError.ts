@@ -1,10 +1,16 @@
-export type ApiErrorKind = 'network' | 'timeout' | 'http' | 'invalid_response'
+export type ApiErrorKind = 'network' | 'timeout' | 'http' | 'invalid_response' | 'cancelled'
+export type ApiFailureCategory =
+  | 'CORE_UNAVAILABLE'
+  | 'TIMEOUT'
+  | 'API_ERROR'
+  | 'VALIDATION_ERROR'
+  | 'DATABASE_UNAVAILABLE'
+  | 'INVALID_RESPONSE'
+  | 'CANCELLED'
 
 /**
- * The one error type every api/* call can throw. Callers branch on `kind`
- * (and optionally `code` from the backend's error envelope) instead of
- * inspecting fetch/DOM exception internals — see docs/architecture.md
- * "Frontend error handling".
+ * The one error type every api call can throw. Transport failures,
+ * backend/domain responses and cancelled requests remain distinguishable.
  */
 export class ApiClientError extends Error {
   readonly kind: ApiErrorKind
@@ -23,7 +29,6 @@ export class ApiClientError extends Error {
     this.code = options?.code
   }
 
-  /** Safe to show directly in the UI — never leaks raw technical detail. */
   get userMessage(): string {
     switch (this.kind) {
       case 'network':
@@ -34,6 +39,23 @@ export class ApiClientError extends Error {
         return this.message || 'Restaurant Core respondió con un error.'
       case 'invalid_response':
         return 'Restaurant Core envió una respuesta inesperada.'
+      case 'cancelled':
+        return 'La solicitud fue cancelada.'
     }
   }
+
+  get category(): ApiFailureCategory {
+    if (this.kind === 'network') return 'CORE_UNAVAILABLE'
+    if (this.kind === 'timeout') return 'TIMEOUT'
+    if (this.kind === 'invalid_response') return 'INVALID_RESPONSE'
+    if (this.kind === 'cancelled') return 'CANCELLED'
+    if (this.code === 'DATABASE_UNAVAILABLE') return 'DATABASE_UNAVAILABLE'
+    if (this.status === 422) return 'VALIDATION_ERROR'
+    return 'API_ERROR'
+  }
+}
+
+export function isInfrastructureError(error: unknown): boolean {
+  if (!(error instanceof ApiClientError)) return false
+  return ['CORE_UNAVAILABLE', 'TIMEOUT', 'DATABASE_UNAVAILABLE', 'CANCELLED'].includes(error.category)
 }

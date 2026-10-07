@@ -103,7 +103,24 @@ or `npm run tauri -- dev` to actually run Restaurant Admin.
 |---|---|
 | `VITE_CORE_BASE_URL` | Restaurant Core's base URL |
 | `VITE_STATUS_POLL_INTERVAL_MS` | How often the status screen re-polls Core |
+| `VITE_STATUS_POLL_MAX_INTERVAL_MS` | Maximum reconnect backoff while Core remains offline |
 | `VITE_CORE_REQUEST_TIMEOUT_MS` | Per-request timeout before Core is treated as unreachable |
+
+### Connectivity development rules
+
+- Consume useSystemStatusContext for Core, database, local-server and Internet
+  state. Do not add screen-level health polling.
+- Do not emit CORE_UNAVAILABLE or DATABASE_UNAVAILABLE from a feature screen.
+  The provider emits keyed notifications once per transition.
+- Gate backend-dependent writes with snapshot.localOperationAvailable.
+- Keep navigation available during outages and render load errors inline.
+- A functional refresh such as the orders board may poll its business data,
+  but it must pause while global connectivity is unavailable and must not be
+  used as a second health monitor.
+
+Connectivity regression tests live in the connectivity logic, polling
+lifecycle and toast logic test files under apps/admin-desktop/src. Run them
+with npm test.
 
 ## Common commands
 

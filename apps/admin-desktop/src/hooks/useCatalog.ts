@@ -2,10 +2,13 @@ import { useCallback, useEffect, useState } from 'react'
 import * as api from '../api/catalog'
 import { fetchCenters, type ProductionCenter } from '../api/production'
 import { ApiClientError } from '../api/ApiClientError'
+import { useSystemStatusContext } from '../app/SystemStatusContext'
 
 export function catalogError(error: unknown) { return error instanceof ApiClientError ? error.userMessage : 'No pudimos completar la operación.' }
 
 export function useCatalog() {
+  const system = useSystemStatusContext()
+  const available = system.snapshot.localOperationAvailable
   const [categories, setCategories] = useState<api.ProductCategory[]>([])
   const [modifierGroups, setModifierGroups] = useState<api.ModifierGroup[]>([])
   const [productionCenters, setProductionCenters] = useState<ProductionCenter[]>([])
@@ -22,10 +25,16 @@ export function useCatalog() {
   }, [])
 
   useEffect(() => {
+    if (!available) {
+      const unavailableId = window.setTimeout(() => {
+        if (system.connectivity !== 'CHECKING') setLoading(false)
+      }, 0)
+      return () => window.clearTimeout(unavailableId)
+    }
     const controller = new AbortController()
     const startId = window.setTimeout(() => void load(controller.signal), 0)
     return () => { window.clearTimeout(startId); controller.abort() }
-  }, [load])
+  }, [available, load, system.connectivity])
   async function mutate<T>(operation: () => Promise<T>) { setSaving(true); try { const result = await operation(); await load(); return result } finally { setSaving(false) } }
 
   return { categories, modifierGroups, productionCenters, loading, saving, error, clearError: () => setError(null), refresh: load,
